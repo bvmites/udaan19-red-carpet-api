@@ -6,7 +6,7 @@ const {Nominee} = require('./db/nominee');
 const {User} = require('./db/user');
 const {Category} = require('./db/category');
 const {Votes} = require('./db/votes');
-var app = express();
+const app = express();
 app.use(bodyParser.json());
 
 app.post('/nominee',(req,res)=>{
