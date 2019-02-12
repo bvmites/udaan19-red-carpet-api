@@ -94,11 +94,16 @@ AdminSchema.pre('save', function (next) {
 });
 
 var Admin = mongoose.model('Admin',AdminSchema);
-var admin = new Admin({
+var admin1 = new Admin({
 	admin_id:"Nikunj",
 	password:"abcdef"
 });
-admin.save();
+var admin2 = new Admin({
+	admin_id:"Manas",
+	password:"abcdef"
+});
+admin1.save();
+admin2.save();
 // Admin.insertMany(admin).then(()=>{}).catch((e)=>console.log(e));
 
 module.exports = {Admin};
