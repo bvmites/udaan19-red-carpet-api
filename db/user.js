@@ -82,6 +82,19 @@ UserSchema.statics.findByToken = function (token) {
   });
 };
 
+UserSchema.statics.addVoteStatus = function (name) {
+    var User = this;
+    // console.log('in update');
+    User.updateMany({  
+            $push:{
+                voteStatus:{
+                    category_name:name,
+                    isVoted:false
+                }
+            }
+        })
+}
+
 UserSchema.methods.removeToken = function (token) {
   var user = this;
 
