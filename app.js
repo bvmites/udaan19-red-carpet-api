@@ -1,29 +1,30 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const _ = require('lodash');
 const {mongoose} = require('./db/mongoose');
 const {Admin} = require('./db/admin');
 const {Nominee} = require('./db/nominee');
 const {User} = require('./db/user');
 const {Category} = require('./db/category');
 const {Votes} = require('./db/votes');
+const {user_authenticate} = require('./middleware/auth-user');
+const {admin_authenticate} = require('./middleware/auth-admin');
 var app = express();
 app.use(bodyParser.json());
 
 app.post('/nominee',(req,res)=>{
-    // res.send('Hello There!');
     var nominee = new Nominee({
        name: req.body.name,
        category_name:req.body.category_name
     });
     nominee.save().then((doc)=>{
         res.send(doc);
-    },(e)=>{
+    },(e)=>{    
         res.status(400).send(e);
     })
 });
 
 app.post('/category',(req,res)=>{
-    // res.send('Running');
     var category = new Category({
        name: req.body.name
     });
@@ -32,7 +33,6 @@ app.post('/category',(req,res)=>{
     },(e)=>{
         res.status(400).send(e);
     })
-    // res.send('Hello There!');
 });
 
 app.post('/votes',(req,res)=>{
@@ -52,16 +52,9 @@ app.post('/votes',(req,res)=>{
     },(err,result)=>{
         if(result){
             result.votes=result.votes+1;
-            result.save();
+            result.save().then(()=>{}).catch((e)=>console.log(e));
         }
-        // if(result){
-        //     result.votes=result.votes+1;
-        //     res.send(result);
-        // }
-        // else
-        //     res.status(400).send();
     })
-    // res.send('Hello There!');
 });
 
 app.get('/display',(req,res)=>{
@@ -70,7 +63,47 @@ app.get('/display',(req,res)=>{
     }).catch((e)=>{
         res.status(400).send();
     })
-    // res.send('Hello There!');
+});
+
+app.post('/user/login',(req, res) => {
+  // var body = _.pick(req.body, ['user_id', 'password']);
+  var body = req.body;
+  User.findByCredentials(body.user_id, body.password).then((user) => {
+    return user.generateAuthToken().then((token) => {
+      res.header('x-auth', token).send(user);
+    });
+  }).catch((e) => {
+    res.status(400).send(e);
+  });
+});
+
+app.delete('/user/me/logout', user_authenticate, (req, res) => {
+  req.user.removeToken(req.token).then(() => {
+    res.status(200).send();
+  }, () => {
+    res.status(400).send();
+  });
+});
+
+
+app.post('/admin/login',(req, res) => {
+  // var body = _.pick(req.body, ['user_id', 'password']);
+  var body = req.body;
+  Admin.findByCredentials(body.admin_id, body.password).then((admin) => {
+    return admin.generateAuthToken().then((token) => {
+      res.header('x-auth', token).send(admin);
+    });
+  }).catch((e) => {
+    res.status(400).send(e);
+  });
+});
+
+app.delete('/admin/me/logout', admin_authenticate, (req, res) => {
+  req.admin.removeToken(req.token).then(() => {
+    res.status(200).send();
+  }, () => {
+    res.status(400).send();
+  });
 });
 
 app.listen(3000,()=>{
