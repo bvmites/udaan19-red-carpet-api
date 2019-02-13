@@ -5,15 +5,29 @@ var VotesSchema = new mongoose.Schema({
         type:String,
         required:true,
     },
-    category_name:{
-            type:String,
-            required:true
-    },
-    nominee_name:{
-
-        type:String,
-        require:true
-    }
+    // category_name:{
+    //         type:String,
+    //         required:true
+    // },
+    // nominee_name:{
+    //     type:String,
+    //     require:true
+    // }
+    myVotes:[{
+        category_name:{
+            type:String
+        },
+        nominee_name:{
+            type:String
+        }
+    },{
+        category_name:{
+            type:String
+        },
+        nominee_name:{
+            type:String
+        }
+    }]
 });
 
 var Votes = mongoose.model('Votes',VotesSchema);

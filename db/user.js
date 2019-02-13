@@ -12,22 +12,24 @@ var UserSchema = new mongoose.Schema({
             type:String,
             required:true,
     },
-    voteStatus:[{
-        category_name:{
-            type:String
+    // voteStatus:[{
+    //     category_name:{
+    //         type:String
             
-        },isVoted:{
-            type:Boolean
-        }
-    },{
-        category_name:{
-            type:String
+    //     },isVoted:{
+    //         type:Boolean
+    //     }
+    // },{
+    //     category_name:{
+    //         type:String
             
-        },isVoted:{
-            type:Boolean
-        }
-    }],
-
+    //     },isVoted:{
+    //         type:Boolean
+    //     }
+    // }],
+    voteStatus:{
+      type:Boolean
+    },
     token:{
         type:String,
     }
@@ -82,18 +84,20 @@ UserSchema.statics.findByToken = function (token) {
   });
 };
 
-UserSchema.statics.addVoteStatus = function (name) {
-    var User = this;
-    // console.log('in update');
-    User.updateMany({  
-            $push:{
-                voteStatus:{
-                    category_name:name,
-                    isVoted:false
-                }
-            }
-        })
-}
+// UserSchema.statics.addVoteStatus = function (name) {
+//     var User = this;
+//     // console.log('in update');
+//     User.updateMany({
+//         __v:0
+//     },{  
+//             $push:{
+//                 voteStatus:{
+//                     category_name:name,
+//                     isVoted:false
+//                 }
+//             }
+//         })
+// }
 
 UserSchema.methods.removeToken = function (token) {
   var user = this;
@@ -125,28 +129,26 @@ var User = mongoose.model('User',UserSchema);
 var user=[new User({
     user_id:"16cp063",
     password:"abcdef",
-    voteStatus:[{
-        category_name:'Face of the Year',
-        isVoted:false
-    },{
-        category_name:'Sport Person of the Year',
-        isVoted:false
-    }]
+    voteStatus:false
 }),new User({
     user_id:"16cp043",
     password:"abcdef",
-    voteStatus:[{
-        category_name:'Sport Person of the Year',
-        isVoted:false
-    },
-    {
-        category_name:'Face of the Year',
-        isVoted:false
-    }]
+    voteStatus:false
 })]
 
-user[0].save();
-user[1].save();
+user[0].save().then(()=>{
+
+}).catch(()=>{
+  // console.log();
+});
+user[1].save().then(()=>{
+
+}).catch(()=>{
+  // console.log();
+});
 // User.insertMany(user).then(()=>{}).catch((e)=>console.log(e));
 
 module.exports = {User};
+
+
+

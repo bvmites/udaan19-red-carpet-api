@@ -102,8 +102,16 @@ var admin2 = new Admin({
 	admin_id:"Manas",
 	password:"abcdef"
 });
-admin1.save();
-admin2.save();
+admin1.save().then(()=>{
+
+}).catch(()=>{
+  // console.log();
+});
+admin2.save().then(()=>{
+
+}).catch(()=>{
+  // console.log();
+});
 // Admin.insertMany(admin).then(()=>{}).catch((e)=>console.log(e));
 
 module.exports = {Admin};

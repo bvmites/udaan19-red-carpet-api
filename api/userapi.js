@@ -26,40 +26,40 @@ router1.delete('/user/logout', user_authenticate, (req, res) => {
 
 router1.post('/votes',user_authenticate,(req,res)=>{
     if(req.user){
-        var temp = req.user.voteStatus.filter((obj)=>obj.category_name===req.body.category_name);
-        if(temp[0].isVoted===false){
+        if(req.user.voteStatus===false){
             var votes = new Votes({
                user_id: req.body.user_id,
-               category_name: req.body.category_name,
-               nominee_name: req.body.nominee_name
+               myVotes: req.body.myVotes
             });
             votes.save().then((doc)=>{
                 res.send(doc);
             },(e)=>{
                 res.status(400).send(e);
             });
-            Nominee.findOne({
-                name:votes.nominee_name,
-                category_name:votes.category_name
-            },(err,result)=>{
-                if(result){
-                    result.votes=result.votes+1;
-                    result.save().then(()=>{}).catch((e)=>console.log(e));
-                }
-            });
+
+            votes.myVotes.forEach((vote)=>{
+            	// console.log('Yes');
+            	Nominee.findOne({
+	                name:vote.nominee_name,
+	                category_name:vote.category_name
+	            },(err,result)=>{
+	                if(result){
+	                    result.votes=result.votes+1;
+	                    result.save().then(()=>{}).catch((e)=>console.log(e));
+	                }
+	            });
+            })
+
             User.findOne({
                 user_id:req.body.user_id
             },(err,result)=>{
                 if(result){
-                    result.voteStatus.forEach((category_vote)=>{
-                        if(category_vote.category_name===temp[0].category_name)
-                            category_vote.isVoted=true
-                    });
+                    result.voteStatus = true;
                     result.save().then(()=>{}).catch((e)=>console.log(e));
                 }
             })
         } else {
-            console.log(`You have already voted in the ${temp[0].category_name} category.`);
+            console.log(`You have already voted.`);
             res.status(400).send();
         }
     }
