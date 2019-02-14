@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const _ = require('lodash');
-// const validator = require('validator');
 const jwt = require('jsonwebtoken');
 
 var AdminSchema = new mongoose.Schema({
@@ -21,7 +20,7 @@ var AdminSchema = new mongoose.Schema({
 
 AdminSchema.methods.generateAuthToken = function () {
   var admin = this;
-  var token = jwt.sign({_id: admin._id.toHexString()},'abc123').toString(); // process.env.JWTTOKEN
+  var token = jwt.sign({_id: admin._id.toHexString()},process.env.JWT_SECRET).toString();
 
   admin.token=token;
 
@@ -56,7 +55,7 @@ AdminSchema.statics.findByToken = function (token) {
   var decoded;
 
   try {
-    decoded = jwt.verify(token,'abc123'); // process.env.JWT_SECRET
+    decoded = jwt.verify(token,process.env.JWT_SECRET);
   } catch (e) {
     return Promise.reject();
   }
@@ -93,25 +92,21 @@ AdminSchema.pre('save', function (next) {
   }
 });
 
+AdminSchema.methods.toJSON = function () {
+  var admin = this;
+  var adminObject = admin.toObject();
+
+  return _.pick(adminObject, ['admin_id']);
+};
+
 var Admin = mongoose.model('Admin',AdminSchema);
+
 var admin1 = new Admin({
 	admin_id:"Nikunj",
 	password:"abcdef"
 });
-var admin2 = new Admin({
-	admin_id:"Manas",
-	password:"abcdef"
-});
 admin1.save().then(()=>{
-
-}).catch(()=>{
-  // console.log();
+  }).catch(()=>{
 });
-admin2.save().then(()=>{
-
-}).catch(()=>{
-  // console.log();
-});
-// Admin.insertMany(admin).then(()=>{}).catch((e)=>console.log(e));
 
 module.exports = {Admin};

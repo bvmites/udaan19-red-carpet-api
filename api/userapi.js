@@ -1,11 +1,10 @@
-const router1 = require('express').Router();
+const user_router = require('express').Router();
 const {user_authenticate} = require('./../middleware/auth-user');
 const {User} = require('./../db/user');
 const {Votes} = require('./../db/votes');
 const {Nominee} = require('./../db/nominee');
 
-router1.post('/user/login',(req, res) => {
-  // var body = _.pick(req.body, ['user_id', 'password']);
+user_router.post('/user/login',(req, res) => {
   var body = req.body;
   User.findByCredentials(body.user_id, body.password).then((user) => {
     return user.generateAuthToken().then((token) => {
@@ -16,7 +15,7 @@ router1.post('/user/login',(req, res) => {
   });
 });
 
-router1.delete('/user/logout', user_authenticate, (req, res) => {
+user_router.delete('/user/logout', user_authenticate, (req, res) => {
   req.user.removeToken(req.token).then(() => {
     res.status(200).send();
   }, () => {
@@ -24,7 +23,7 @@ router1.delete('/user/logout', user_authenticate, (req, res) => {
   });
 });
 
-router1.post('/votes',user_authenticate,(req,res)=>{
+user_router.post('/votes',user_authenticate,(req,res)=>{
     if(req.user){
         if(req.user.voteStatus===false){
             var votes = new Votes({
@@ -38,7 +37,6 @@ router1.post('/votes',user_authenticate,(req,res)=>{
             });
 
             votes.myVotes.forEach((vote)=>{
-            	// console.log('Yes');
             	Nominee.findOne({
 	                name:vote.nominee_name,
 	                category_name:vote.category_name
@@ -59,10 +57,11 @@ router1.post('/votes',user_authenticate,(req,res)=>{
                 }
             })
         } else {
-            console.log(`You have already voted.`);
-            res.status(400).send();
+            res.status(400).send({
+            	"error":"You have already voted."
+            });
         }
     }
 });
 
-module.exports= {router1};
+module.exports= {user_router};

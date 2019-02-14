@@ -20,7 +20,7 @@ NomineeSchema.methods.toJSON = function () {
   var nominee = this;
   var nomineeObject = nominee.toObject();
 
-  return _.pick(nomineeObject, ['name', 'votes']);
+  return _.pick(nomineeObject, ['name','category_name','votes']);
 };
 
 var Nominee = mongoose.model('Nominee',NomineeSchema);

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const _ = require('lodash');
 
 var CategorySchema = new mongoose.Schema({
     name:{
@@ -8,7 +9,13 @@ var CategorySchema = new mongoose.Schema({
     }
 });
 
+CategorySchema.methods.toJSON = function () {
+  var category = this;
+  var categoryObject = category.toObject();
+
+  return _.pick(categoryObject, ['name']);
+};
+
 var Category = mongoose.model('Category',CategorySchema);
 
 module.exports = {Category};
-

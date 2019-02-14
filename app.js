@@ -1,6 +1,7 @@
+require('./config.js');
+
 const express = require('express');
 const bodyParser = require('body-parser');
-const _ = require('lodash');
 const {mongoose} = require('./db/mongoose');
 const {Admin} = require('./db/admin');
 const {Nominee} = require('./db/nominee');
@@ -9,184 +10,16 @@ const {Category} = require('./db/category');
 const {Votes} = require('./db/votes');
 const {user_authenticate} = require('./middleware/auth-user');
 const {admin_authenticate} = require('./middleware/auth-admin');
-const hbs = require('hbs');
-const http = require('http');
-const socketIO = require('socket.io');
-const server = http.createServer(app);
-const io = socketIO(server);
-const url=require('url');
-const {router} = require('./api/adminapi');
-const {router1} = require('./api/userapi');
-
+const {admin_router} = require('./api/adminapi');
+const {user_router} = require('./api/userapi');
+const port = process.env.PORT;
 
 var app = express();
 app.use(bodyParser.json());
 
-app.use('/',router);
-app.use('/',router1);
+app.use('/',admin_router);
+app.use('/',user_router);
 
-// app.use(express.static(__dirname + '/public'));
-
-// app.get('/',(req,res)=>{
-//     res.render('index.html');
-// });
-
-// app.post('/nominee',admin_authenticate,(req,res)=>{
-//     if(req.admin){
-//         // console.log('token');
-//         // console.log(req.body.category_name);
-//         Category.find({
-//             name:req.body.category_name
-//         },(err,result)=>{
-//             console.log(result);
-//             if(result.length>0){
-//                 // console.log('Yes');
-//                 var nominee = new Nominee({
-//                    name: req.body.name,
-//                    category_name:req.body.category_name
-//                 });
-//                 nominee.save().then((doc)=>{
-//                     res.send(doc);
-//                 },(e)=>{    
-//                     res.status(400).send(e);
-//                 });
-//             } else {
-//                 res.status(400).send();
-//             }
-//         })
-//     }  
-// });        
-
-
-// app.post('/category',admin_authenticate,(req,res)=>{
-//     if(req.admin){
-//         var category = new Category({
-//            name: req.body.name
-//         });
-//         category.save().then((doc)=>{
-//             res.send(doc);
-//             // User.addVoteStatus(category.name);
-//         },(e)=>{
-//             res.status(400).send(e);
-//         })
-        
-//     }
-// });
-
-// app.post('/votes',user_authenticate,(req,res)=>{
-//     if(req.user){
-//         var temp = req.user.voteStatus.filter((obj)=>obj.category_name===req.body.category_name);
-//         if(temp[0].isVoted===false){
-//             var votes = new Votes({
-//                user_id: req.body.user_id,
-//                category_name: req.body.category_name,
-//                nominee_name: req.body.nominee_name
-//             });
-//             votes.save().then((doc)=>{
-//                 res.send(doc);
-//             },(e)=>{
-//                 res.status(400).send(e);
-//             });
-//             Nominee.findOne({
-//                 name:votes.nominee_name,
-//                 category_name:votes.category_name
-//             },(err,result)=>{
-//                 if(result){
-//                     result.votes=result.votes+1;
-//                     result.save().then(()=>{}).catch((e)=>console.log(e));
-//                 }
-//             });
-//             User.findOne({
-//                 user_id:req.body.user_id
-//             },(err,result)=>{
-//                 if(result){
-//                     result.voteStatus.forEach((category_vote)=>{
-//                         if(category_vote.category_name===temp[0].category_name)
-//                             category_vote.isVoted=true
-//                     });
-//                     result.save().then(()=>{}).catch((e)=>console.log(e));
-//                 }
-//             })
-//         } else {
-//             console.log(`You have already voted in the ${temp[0].category_name} category.`);
-//             res.status(400).send();
-//         }
-//     }
-// });
-
-// app.get('/display',admin_authenticate,(req,res)=>{
-//     if(req.admin){
-//         Nominee.find().then((nominee)=>{
-//             res.send(nominee);
-//         }).catch((e)=>{
-//             res.status(400).send();
-//         })
-//     }
-// });
-
-// app.post('/user/login',(req, res) => {
-//   // var body = _.pick(req.body, ['user_id', 'password']);
-//   var body = req.body;
-//   User.findByCredentials(body.user_id, body.password).then((user) => {
-//     return user.generateAuthToken().then((token) => {
-//       res.header('x-auth', token).send(user);
-//     });
-//   }).catch((e) => {
-//     res.status(400).send(e);
-//   });
-// });
-
-// app.delete('/user/logout', user_authenticate, (req, res) => {
-//   req.user.removeToken(req.token).then(() => {
-//     res.status(200).send();
-//   }, () => {
-//     res.status(400).send();
-//   });
-// });
-
-
-// app.post('/admin/login',(req, res) => {
-//   // var body = _.pick(req.body, ['user_id', 'password']);
-//   var body = req.body;
-//   Admin.findByCredentials(body.admin_id, body.password).then((admin) => {
-//     return admin.generateAuthToken().then((token) => {
-//       res.header('x-auth', token).send(admin);
-//     });
-//   }).catch((e) => {
-//     res.status(400).send(e);
-//   });
-// });
-
-// app.delete('/admin/logout', admin_authenticate, (req, res) => {
-//   req.admin.removeToken(req.token).then(() => {
-//     res.status(200).send();
-//   }, () => {
-//     res.status(400).send();
-//   });
-// });
-
-// app.post('/admin/addUser',admin_authenticate,(req,res)=>{
-//     if(req.admin){
-//         console.log('Yes');
-//         var user = new User({
-//             user_id:req.body.user_id,
-//             password:req.body.password,
-//             voteStatus:[{
-//                 category_name:'Face of the Year',
-//                 isVoted:false
-//             },{
-//                 category_name:'Sport Person of the Year',
-//                 isVoted:false
-//             }]
-//         });
-//         user.save().then((doc)=>{
-//             res.send(doc);
-//         }).catch((e)=>{
-//             res.status(400).send(e);
-//         })
-//     }
-// });
-
-app.listen(3000,()=>{
-    console.log('Server is upto 3000');
+app.listen(port,()=>{
+    console.log(`Server is running on ${port} port.`);
 })

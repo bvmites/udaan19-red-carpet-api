@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const _ = require('lodash');
 
 var UserSchema = new mongoose.Schema({
     user_id:{
@@ -12,33 +13,18 @@ var UserSchema = new mongoose.Schema({
             type:String,
             required:true,
     },
-    // voteStatus:[{
-    //     category_name:{
-    //         type:String
-            
-    //     },isVoted:{
-    //         type:Boolean
-    //     }
-    // },{
-    //     category_name:{
-    //         type:String
-            
-    //     },isVoted:{
-    //         type:Boolean
-    //     }
-    // }],
     voteStatus:{
-      type:Boolean
+      type:Boolean,
+      default:false
     },
     token:{
         type:String,
     }
-
 });
 
 UserSchema.methods.generateAuthToken = function () {
   var user = this;
-  var token = jwt.sign({_id: user._id.toHexString()},'abc123').toString(); // process.env.JWTTOKEN
+  var token = jwt.sign({_id: user._id.toHexString()},process.env.JWT_SECRET).toString();
 
   user.token=token;
 
@@ -73,7 +59,7 @@ UserSchema.statics.findByToken = function (token) {
   var decoded;
 
   try {
-    decoded = jwt.verify(token,'abc123'); // process.env.JWT_SECRET
+    decoded = jwt.verify(token,process.env.JWT_SECRET);
   } catch (e) {
     return Promise.reject();
   }
@@ -83,21 +69,6 @@ UserSchema.statics.findByToken = function (token) {
     'token': token
   });
 };
-
-// UserSchema.statics.addVoteStatus = function (name) {
-//     var User = this;
-//     // console.log('in update');
-//     User.updateMany({
-//         __v:0
-//     },{  
-//             $push:{
-//                 voteStatus:{
-//                     category_name:name,
-//                     isVoted:false
-//                 }
-//             }
-//         })
-// }
 
 UserSchema.methods.removeToken = function (token) {
   var user = this;
@@ -124,31 +95,13 @@ UserSchema.pre('save', function (next) {
   }
 });
 
+UserSchema.methods.toJSON = function () {
+  var user = this;
+  var userObject = user.toObject();
+
+  return _.pick(userObject, ['user_id']);
+};
+
 var User = mongoose.model('User',UserSchema);
 
-var user=[new User({
-    user_id:"16cp063",
-    password:"abcdef",
-    voteStatus:false
-}),new User({
-    user_id:"16cp043",
-    password:"abcdef",
-    voteStatus:false
-})]
-
-user[0].save().then(()=>{
-
-}).catch(()=>{
-  // console.log();
-});
-user[1].save().then(()=>{
-
-}).catch(()=>{
-  // console.log();
-});
-// User.insertMany(user).then(()=>{}).catch((e)=>console.log(e));
-
 module.exports = {User};
-
-
-

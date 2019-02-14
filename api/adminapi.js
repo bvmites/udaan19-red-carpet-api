@@ -1,20 +1,18 @@
-const router = require('express').Router();
+const admin_router = require('express').Router();
 const {admin_authenticate} = require('./../middleware/auth-admin');
 const {Admin} = require('./../db/admin');
 const {Nominee} = require('./../db/nominee');
 const {User} = require('./../db/user');
 const {Category} = require('./../db/category');
+const {SHA256} = require('crypto-js');
 
-router.post('/nominee',admin_authenticate,(req,res)=>{
+admin_router.post('/nominee',admin_authenticate,(req,res)=>{
     if(req.admin){
-        // console.log('token');
-        // console.log(req.body.category_name);
         Category.find({
             name:req.body.category_name
         },(err,result)=>{
             console.log(result);
             if(result.length>0){
-                // console.log('Yes');
                 var nominee = new Nominee({
                    name: req.body.name,
                    category_name:req.body.category_name
@@ -31,14 +29,13 @@ router.post('/nominee',admin_authenticate,(req,res)=>{
     }  
 });        
 
-router.post('/category',admin_authenticate,(req,res)=>{
+admin_router.post('/category',admin_authenticate,(req,res)=>{
     if(req.admin){
         var category = new Category({
            name: req.body.name
         });
         category.save().then((doc)=>{
             res.send(doc);
-            // User.addVoteStatus(category.name);
         },(e)=>{
             res.status(400).send(e);
         })
@@ -46,7 +43,7 @@ router.post('/category',admin_authenticate,(req,res)=>{
     }
 });
 
-router.get('/display',admin_authenticate,(req,res)=>{
+admin_router.get('/display',admin_authenticate,(req,res)=>{
     if(req.admin){
         Nominee.find().then((nominee)=>{
             res.send(nominee);
@@ -56,8 +53,7 @@ router.get('/display',admin_authenticate,(req,res)=>{
     }
 });
 
-router.post('/admin/login',(req, res) => {
-  // var body = _.pick(req.body, ['user_id', 'password']);
+admin_router.post('/admin/login',(req, res) => {
   var body = req.body;
   Admin.findByCredentials(body.admin_id, body.password).then((admin) => {
     return admin.generateAuthToken().then((token) => {
@@ -68,7 +64,7 @@ router.post('/admin/login',(req, res) => {
   });
 });
 
-router.delete('/admin/logout', admin_authenticate, (req, res) => {
+admin_router.delete('/admin/logout', admin_authenticate, (req, res) => {
   req.admin.removeToken(req.token).then(() => {
     res.status(200).send();
   }, () => {
@@ -76,26 +72,21 @@ router.delete('/admin/logout', admin_authenticate, (req, res) => {
   });
 });
 
-router.post('/admin/addUser',admin_authenticate,(req,res)=>{
+admin_router.post('/admin/addUser',admin_authenticate,(req,res)=>{
     if(req.admin){
-        console.log('Yes');
         var user = new User({
             user_id:req.body.user_id,
-            password:req.body.password,
-            voteStatus:[{
-                category_name:'Face of the Year',
-                isVoted:false
-            },{
-                category_name:'Sport Person of the Year',
-                isVoted:false
-            }]
+            password:SHA256(req.body.user_id+process.env.GEN_SECRET).toString().substring(15,21)
         });
-        user.save().then((doc)=>{
-            res.send(doc);
+        res.status(200).send({
+            "user_id":user.user_id,
+            "password":user.password
+        });
+        user.save().then(()=>{
         }).catch((e)=>{
             res.status(400).send(e);
         })
     }
 });
 
-module.exports = {router};
+module.exports = {admin_router};
