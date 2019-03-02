@@ -1,5 +1,5 @@
-require('./config.js');
-
+const dotenv = require('dotenv')
+dotenv.config()
 const express = require('express');
 const bodyParser = require('body-parser');
 const {mongoose} = require('./db/mongoose');
@@ -21,5 +21,5 @@ app.use('/',admin_router);
 app.use('/',user_router);
 
 app.listen(port,()=>{
-    console.log(`Server is running on ${port} port.`);
+    console.log(`Server is running on port ${port}.`);
 })
