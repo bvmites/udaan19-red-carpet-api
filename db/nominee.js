@@ -23,6 +23,12 @@ NomineeSchema.methods.toJSON = function () {
   return _.pick(nomineeObject, ['name','category_name','votes']);
 };
 
+NomineeSchema.statics.getVoteSummary = function () {
+    // var nominees=[];
+    return Nominee.find()
+    // return nominees;
+}
+
 var Nominee = mongoose.model('Nominee',NomineeSchema);
 
 module.exports = {Nominee};

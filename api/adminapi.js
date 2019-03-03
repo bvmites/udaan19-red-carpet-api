@@ -43,15 +43,15 @@ admin_router.post('/category',admin_authenticate,(req,res)=>{
     }
 });
 
-admin_router.get('/display',admin_authenticate,(req,res)=>{
-    if(req.admin){
-        Nominee.find().then((nominee)=>{
-            res.send(nominee);
-        }).catch((e)=>{
-            res.status(400).send();
-        })
-    }
-});
+// admin_router.get('/display',admin_authenticate,(req,res)=>{
+//     if(req.admin){
+//         Nominee.find().then((nominee)=>{
+//             res.send(nominee);
+//         }).catch((e)=>{
+//             res.status(400).send();
+//         })
+//     }
+// });
 
 admin_router.post('/admin/login',(req, res) => {
   var body = req.body;
